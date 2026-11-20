@@ -10,11 +10,11 @@
 - 重跑手册 + 结构核对脚本（参数量 / 视觉 token 数）
 - 入口：[`smolvla-精读复现/README.md`](smolvla-精读复现/README.md)
 
-## 2. 源码阅读指南 —— [`smolvla-reading/`](smolvla-reading/GUIDE.md)
+## 2. LeRobot 目录指南与中文注释源码
 
-- `GUIDE.md`：基于 LeRobot 0.7.1（commit `83883ae60`）与 LIBERO-Spatial task 0 评测的源码阅读路线，分阶段、带自查与练习
-- `annotated/`：37 份带原行号中文注释的源码副本（`.txt`，1.2 MB），搜索 `# L0256` 可跳到原文件第 256 行
-- 入口：[`smolvla-reading/GUIDE.md`](smolvla-reading/GUIDE.md)
+- [目录与 Python 包指南](smolvla-reading/GUIDE.md) 说明工作区、LeRobot 仓库和各包的用途。
+- [加过中文注释的 LeRobot 文件](lerobot/) 保留原本的 `.py` 和 `pyproject.toml` 路径。搜索 `中文 L0256` 可以查找原提交第 256 行。
+- [早期阅读副本](smolvla-reading/annotated/) 包括 checkpoint 配置和安装依赖的对照说明。
 
 ---
 
