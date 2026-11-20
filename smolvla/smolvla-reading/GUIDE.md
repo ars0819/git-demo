@@ -1,5 +1,89 @@
 # LeRobot 目录与 Python 包指南
 
+## 零基础快速开始
+
+第一次打开项目时，从下面的第 1 课开始。先做一次「在文件 A 看见一个名字，到文件 B 找到它」，就能用同样的方法追踪 `lerobot-eval`。本课只用纯 Python，源码只需在编辑器里打开。
+
+### 五节入门课
+
+| 课次 | 主题 | 读完能做什么 |
+|---|---|---|
+| 1 | Python 项目结构、`import`、模块和函数 | 从命令名找到模块，再从调用找到函数定义。 |
+| 2 | 类、对象、继承与 `dataclass` | 区分配置类和一个实际配置对象，读懂字段和父类。 |
+| 3 | NumPy / PyTorch Tensor、`shape` 与索引 | 为批次、时间和特征标记各自的轴，预测索引后的形状。 |
+| 4 | SmolVLA 配置与模型加载 | 追踪源码默认值、checkpoint 配置、命令行参数和权重加载。 |
+| 5 | `select_action()`、Action Chunk 与动作队列 | 手推几次调用，指出何时生成一块动作以及何时取走一个动作。 |
+
+### 第 1 课 · Python 项目结构、import、模块和函数
+
+**本课目标**　把 `lerobot-eval`、`lerobot.scripts.lerobot_eval` 和 `main()` 分别对应到命令、模块与函数，再找一次跨文件导入。
+
+#### 必须掌握的知识
+
+- **模块和包**　一个 `.py` 文件可以是一个模块。包用点号组织模块。`lerobot.configs.eval` 中前两段是包路径，最后的 `eval` 对应 `eval.py`。
+- **导入**　`from A import B` 在模块或包 `A` 中查找名字 `B`，并让当前文件使用这个名字。被导入的名字也可能由 `A` 从另一个文件引入。
+- **函数**　`def main():` 定义函数，缩进处是函数体。`main()` 才是一次调用。看到调用时，可先记下函数名，再搜索它的定义或导入语句。
+- **直接执行与导入**　直接运行 `example.py` 时，文件里的 `__name__` 是 `"__main__"`。用 `import example` 导入它时，`__name__` 是 `"example"`。文件底部的判断让导入者可以使用函数，由直接运行这个文件的人启动示例。
+
+#### 需要阅读的真实代码
+
+下面的行号取自锁定提交 `83883ae60a8e1682552b6853e4170c74d83a4525`。原文件如果已插入中文注释，可以搜 `中文 L0414` 一类的标记。打开 `.txt` 对照副本时搜 `# L0414`。
+
+| 顺序 | 打开文件并定位 | 只读这一小段 |
+|---|---|---|
+| 1 | [pyproject.toml](../lerobot/pyproject.toml) 原第 403、414、443 行 | `[project.scripts]` 中找到 `lerobot-eval="lerobot.scripts.lerobot_eval:main"`。冒号左边是模块路径，右边是其中的函数。第 443 行的 `where = ["src"]` 解释源码为什么能在 `src/` 下找到。 |
+| 2 | [lerobot_eval.py](../lerobot/src/lerobot/scripts/lerobot_eval.py) 原第 1245–1252 行 | 找到 `def main():`，看到函数体先设置日志、登记插件，再调用 `eval_main()`。最下面还有直接运行该文件时调用 `main()` 的判断。 |
+| 3 | [lerobot_eval.py](../lerobot/src/lerobot/scripts/lerobot_eval.py) 原第 76 行和 [configs/eval.py](../lerobot/src/lerobot/configs/eval.py) 原第 30 行 | 从 `from lerobot.configs.eval import EvalPipelineConfig` 追到 `configs/eval.py`。看到名字定义就停，类的写法留到第 2 课。 |
+
+阅读评测入口时，先沿着磁盘上的对应关系找到 `main()`。
+
+```text
+终端命令 lerobot-eval
+    ↓ pyproject.toml 的入口配置
+Python 模块 lerobot.scripts.lerobot_eval
+    ↓ 工作区里的 lerobot/src/lerobot/scripts/lerobot_eval.py
+入口函数 main() → eval_main()
+```
+
+#### 运行一遍纯 Python 示例
+
+示例有两个小文件。[example.py](tutorials/01_imports/example.py) 负责组织任务编号和打印，[task_labels.py](tutorials/01_imports/task_labels.py) 负责把编号变成可读文字。看到 `format_task(task_id)` 时，先在示例顶部找到 `import`，再打开定义该函数的文件。`f"任务 {task_id}"` 会把花括号里的值填入字符串，`return` 把结果交给调用者。
+
+在 Windows PowerShell 中从本指南所在的 `smolvla-reading/` 目录执行下面的命令。如果系统只有 `python` 命令，把 `py` 换成 `python`。
+
+```powershell
+Set-Location .\tutorials\01_imports
+py .\example.py
+py -c "import example; print(example.__name__)"
+```
+
+运行脚本会按行打印 `任务 0` 和 `任务 1`。`py -c` 那一行只打印 `example`。两次 Python 运行都会定义函数。直接执行脚本时，文件底部的条件成立并调用 `main()`。
+
+#### 两道练习
+
+1. **跨文件调用**　打开 `starter.py`，从 `task_labels.py` 导入适合生成回合标签的函数，再用题目给出的任务编号和回合编号打印一条标签。
+2. **控制程序入口**　补上文件底部的入口判断。用直接运行和导入两种方式验证，检查哪一次会打印任务标签。
+
+题目、前置知识和完整预期输出在练习页。先自行填写 `starter.py`，再从练习页底部打开独立的参考答案。 [第 1 课练习](tutorials/01_imports/README.md)
+
+**学完应该能解释**　哪个文件决定 `lerobot-eval` 导入 `main`？拿到一条 `from ... import ...` 后如何找定义？为什么 `py example.py` 会打印任务，而导入 `example` 时由调用者决定什么时候运行函数？
+
+## 五阶段学习路线
+
+入门课提供读代码需要的 Python 和张量基础。五阶段路线按项目功能组织，带你从入口读到完整的仿真闭环。
+
+| 阶段 | 主要入口 | 学习目标 |
+|---|---|---|
+| 1. 认识项目结构 | `pyproject.toml`、`scripts/lerobot_eval.py`、`envs/__init__.py` | 用项目目录、模块路径和导入关系找到代码。 |
+| 2. 理解 SmolVLA 配置 | `configuration_smolvla.py`、checkpoint 的 `config.json` | 分清动作维度、`chunk_size`、`n_action_steps` 和 `num_steps`，核对生效值。 |
+| 3. 理解加载与推理入口 | `policies/factory.py`、`policies/pretrained.py`、`modeling_smolvla.py` | 跟踪策略创建、权重加载和 `select_action()`，判断何时触发完整采样。 |
+| 4. 理解模型内部 | `smolvlm_with_expert.py`、`VLAFlowMatching.sample_actions()`、`euler_integrate()` | 从观测编码跟到 Action Expert 和动作块，读到对应操作时再补注意力和 Flow Matching。 |
+| 5. 理解 LIBERO 闭环 | `rollout()`、策略前后处理、`LocalVectorEnv.step()`、`LiberoEnv.step()` | 从相机、状态和任务文字一路追踪到仿真动作，再读回下一步观测。 |
+
+实验记录中的 `probe-n1/` 是 **单样本验证**，`n_action_steps=1` 表示每块取 1 步，`n_episodes=1` 表示只测了 1 个回合，记录为 0/1。原始 `n_action_steps=50` 的 1/1 结果也只来自单个回合。两个记录都只能描述各自的那一次运行。
+
+## 目录与包速查
+
 这份指南回答「这个文件夹放什么」和「我该去哪个包找代码」。路径以本机复现所用的 **LeRobot 0.7.1**、提交 `83883ae60a8e1682552b6853e4170c74d83a4525` 为准。包的职责来自这份源码，涉及到其他模型的目录也保留了定位说明。
 
 ## 1. 打开工作区时先认这两层
